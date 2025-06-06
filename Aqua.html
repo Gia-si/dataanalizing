@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XỬ LÝ DỮ LIỆU</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f06, #a1c4fd);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            flex-direction: column;
+            overflow: auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #fff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="number"]:focus {
+            border-color: #6a75ff;
+            box-shadow: 0 0 10px rgba(106, 117, 255, 0.3);
+        }
+
+        button {
+            background-color: #6a75ff;
+            color: #fff;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #4a59cc;
+            transform: scale(1.05);
+        }
+
+        #results {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            display: none;
+            margin-top: 30px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        #results.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #summary {
+            font-size: 1.1rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .result-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .ideal {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        #results button,
+        #suggestion button {
+            background-color: #dc3545;
+        }
+
+        #results button:hover,
+        #suggestion button:hover {
+            background-color: #c82333;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: translateY(-30px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        #suggestion {
+            display: none;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            width: 100%;
+            max-width:600px;
+            margin: 0 auto
+        }
+
+        #suggestionContent {
+        font-size: 1.3rem; /* increase text size */
+        color: #333;
+        text-align: center;
+        line-height: 1.6;
+}
+    </style>
+</head>
+<body>
+
+<h1>BẢNG PHÂN TÍCH DỮ LIỆU</h1>
+<!--Hidden Checkbox Era IoT-->
+    <input type ="checkbox" id = "ecCheckbox" style = "display:none;">
+    <input type ="checkbox" id = "tdsCheckbox" style = "display:none;">
+    <input type ="checkbox" id = "doCheckbox" style = "display:none;">
+    <input type ="checkbox" id = "atCheckbox" style = "display:none;">
+    <input type ="checkbox" id = "wtCheckbox" style = "display:none;">
+    <input type ="checkbox" id = "phCheckbox" style = "display:none;">
+    <input type ="checkbox" id = "liCheckbox" style = "display:none;">
+    <input type ="checkbox" id = "hmCheckbox" style = "display:none;">
+<!--Era IoT-->
+
+<script>
+    const eraWidget = new eraWidget();
+    let configTds = null;
+    let configEc = null;
+    let configDo = null;
+    let configAt = null;
+    let configWt = null;
+    let configPh = null;
+    let configLi = null;
+    let configHum = null;
+
+    eraWidget.onConfiguration(
+        (configuration) => {
+        configEc = configuration.realtime_configs.find(config => config.name == "EC")
+        configTds = configuration.realtime_configs.find(config => config.name == "TDS")
+        configDo = configuration.realtime_configs.find(config => config.name == "DO")
+        configAt = configuration.realtime_configs.find(config => config.name == "AT")
+        configWt = configuration.realtime_configs.find(config => config.name == "WT")
+        configPh = configuration.realtime_configs.find(config => config.name == "PH")
+        configLi = configuration.realtime_configs.find(config => config.name == "LI")
+        configHm = configuration.realtime_configs.find(config => config.name == "HM")
+    })
+    eraWidget.onValues(
+        (values) => {
+        if (configEc && values[configEc.id]) {
+            const ecValue = values[configEc.id].value;
+            document.getElementById('ecCheckbox').checked = ecValue > 0;
+            document.getElementById('ec').value = ecValue;
+        }
+        if (configTds && values[configTds.id]) {
+            const tdsValue = values[configTds.id].value;
+            document.getElementById('tdsCheckbox').checked = tdsValue > 0;
+            document.getElementById('tds').value = tdsValue;
+        }
+        if (configDo && values[configDo.id]) {
+            const doValue = values[configDo.id].value;
+            document.getElementById('doCheckbox').checked = doValue > 0;
+            document.getElementById('do').value = doValue;
+        }
+        if (configAt && values[configAt.id]) {
+            const atValue = values[configAt.id].value;
+            document.getElementById('atCheckbox').checked = atValue > 0;
+            document.getElementById('airtemp').value = atValue;
+        }
+        if (configWt && values[configWt.id]) {
+            const wtValue = values[configWt.id].value;
+            document.getElementById('wtCheckbox').checked = wtValue > 0;
+            document.getElementById('watertemp').value = wtValue;
+        }
+        if (configPh && values[configPh.id]) {
+            const phValue = values[configPh.id].value;
+            document.getElementById('phCheckbox').checked = phValue > 0;
+            document.getElementById('ph').value = phValue;
+        }
+        if (configLi && values[configLi.id]) {
+             const liValue = values[configLi.id].value;
+            document.getElementById('liCheckbox').checked = liValue > 0;
+            document.getElementById('light').value = liValue;
+}
+        if (configHm && values[configHm.id]) {
+            const hmValue = values[configHm.id].value;
+            document.getElementById('hmCheckbox').checked = hmValue > 0;
+            document.getElementById('hm').value = hmValue;
+        }
+        
+    })
+
+</script>
+
+<!-- Input Form -->
+<div class="container" id="formContainer">
+    <form id="dataForm">
+        <div class="form-group"><label for="tds">TDS (mg/L):</label><input type="number" id="tds" step="1" required value="0"></div>
+        <div class="form-group"><label for="ec">EC (mS/cm):</label><input type="number" id="ec" step="1" required value="0"></div>
+        <div class="form-group"><label for="do">Oxygen (mg/L):</label><input type="number" id="do" step="0.01" required value="0"></div>
+        <div class="form-group"><label for="airtemp">Air Temperature (°C):</label><input type="number" id="airtemp" step="1" required value="0"></div>
+        <div class="form-group"><label for="watertemp">Water Temperature (°C):</label><input type="number" id="watertemp" step="1" required value="0"></div>
+        <div class="form-group"><label for="ph">pH:</label><input type="number" id="ph" step="0.1" required value="0"></div>
+        <div class="form-group"><label for="light">Light:</label><input type="number" id="light" step="1" required value="0"></div>
+        <div class="form-group"><label for="hm">Humidity (%):</label><input type="number" id="hm" step="1" required value="0"></div>
+        <button type="button" onclick="analyzeData()">PHÂN TÍCH</button>
+    </form>
+</div>
+
+<div id="results">
+    <div id="summary"></div>
+    <button onclick="goBack()">QUAY LẠI</button>
+    <button onclick="showSuggestion()">LẤY LỜI KHUYÊN</button>
+</div>
+
+<!-- Suggestion Page -->
+<div id="suggestion">
+    <div class="container">
+        <div id="suggestionContent" class="result-item"></div>
+        <button onclick="goBackToForm()">QUAY LẠI</button>
+    </div>
+</div>
+
+<script>
+    function analyzeData() {
+        const tds = parseFloat(document.getElementById('tds').value);
+        const ec = parseFloat(document.getElementById('ec').value);
+        const doValue = parseFloat(document.getElementById('do').value);
+        const airtemp = parseFloat(document.getElementById('airtemp').value);
+        const ph = parseFloat(document.getElementById('ph').value);
+        const watertemp = parseFloat(document.getElementById('watertemp').value);
+        const light = parseFloat(document.getElementById('light').value);
+        const Humid = parseFloat(document.getElementById('hm').value);
+
+        let summary = '';
+//TDS
+        if (tds < 300) summary += "<div class='result-item danger'>TDS THẤP: CÁ thiếu khoáng chất !!</div>";
+        else if (tds <= 500) summary += "<div class='result-item ideal'>TDS LÝ TƯỞNG: ĐẠT MỨC ĐỘ ỔN ĐỊNH</div>";
+        else summary += "<div class='result-item warning'>TDS CAO: Cá có thể bị sốc nước</div>";
+//EC
+        if (ec < 0.8) summary += "<div class='result-item warning'>EC THẤP: Cá thiếu khoáng chất</div>";
+        else if (ec <= 1.5) summary += "<div class='result-item ideal'>EC PHÙ HỢP</div>";
+        else summary += "<div class='result-item danger'>EC CAO: Có thể gây sốc</div>";
+//DO
+        if (doValue <= 4) summary += "<div class='result-item danger'>DO RẤT THẤP: Cá có thể tử vong</div>";
+        else if (doValue < 8) summary += "<div class='result-item warning'>DO HƠI THẤP: Ảnh hưởng sinh trưởng</div>";
+        else if (doValue <= 10) summary += "<div class='result-item ideal'>DO LÝ TƯỞNG</div>";
+        else summary += "<div class='result-item warning'>DO CAO: Hyperoxia có thể xảy ra</div>";
+//airtemp
+        if (airtemp < 18) summary += "<div class='result-item warning'>NHIỆT ĐỘ KHÍ THẤP: Cây phát triển chậm</div>";
+        else if (airtemp < 24) summary += "<div class='result-item ideal'>NHIỆT ĐỘ KHÍ PHÙ HỢP</div>";
+        else summary += "<div class='result-item warning'>NHIỆT ĐỘ KHÍ CAO: Cây bị héo</div>";
+//watertemp
+        if (watertemp < 12) summary += "<div class='result-item danger'>NHIỆT ĐỘ NƯỚC RẤT THẤP</div>";
+        else if (watertemp <= 14) summary += "<div class='result-item warning'>NHIỆT ĐỘ NƯỚC HƠI THẤP</div>";
+        else if (watertemp <= 20) summary += "<div class='result-item ideal'>NHIỆT ĐỘ NƯỚC PHÙ HỢP</div>";
+        else summary += "<div class='result-item danger'>NHIỆT ĐỘ NƯỚC CAO</div>";
+//PH
+        if (ph < 6) summary += "<div class='result-item danger'>PH THẤP: Cá có thể gặp tình trạng độc tố</div>";
+        else if (ph <= 7) summary += "<div class='result-item ideal'>PH LÝ TƯỞNG: ĐẠT MỨC ĐỘ ỔN ĐỊNH</div>";
+        else summary += "<div class='result-item danger'>PH CAO: Làm giảm khả năng hấp thụ Oxy</div>";
+//light
+        if (light < 12000) summary += "<div class='result-item warning'>ÁNH SÁNG THẤP</div>";
+        else if (light <= 18000) summary += "<div class='result-item ideal'>ÁNH SÁNG PHÙ HỢP</div>";
+        else summary += "<div class='result-item danger'>ÁNH SÁNG CAO</div>";
+//Humid 
+        if (Humid < 50) summary += "<div class='result-item warning'>ĐỘ ẨM THẤP: Làm cây khó giữ nước, tăng quá trình bốc hơi nước từ cá và bể</div>";
+        else if (Humid <= 70) summary += "<div class='result-item ideal'>ĐỘ ẨM PHÙ HỢP</div>";
+        else summary += "<div class='result-item danger'>ĐỘ ẨM CAO: Cây nấm mốc, bệnh thối rễ,... giảm khả năng trao đổi Oxy của cá</div>";
+
+
+        document.getElementById('summary').innerHTML = summary;
+
+        const formContainer = document.getElementById('formContainer');
+        formContainer.classList.add('fade-out');
+
+        setTimeout(() => {
+            formContainer.style.display = "none";
+            const resultDiv = document.getElementById('results');
+            resultDiv.style.display = "block";
+            resultDiv.classList.add('show');
+        }, 500);
+    }
+
+    function goBack() {
+        const resultDiv = document.getElementById('results');
+        resultDiv.classList.remove('show');
+        setTimeout(() => {
+            resultDiv.style.display = "none";
+            const formContainer = document.getElementById('formContainer');
+            formContainer.style.display = "block";
+            formContainer.classList.remove('fade-out');
+        }, 500);
+    }
+
+    function showSuggestion() {
+    const tds = parseFloat(document.getElementById('tds').value);
+    const ec = parseFloat(document.getElementById('ec').value);
+    const doValue = parseFloat(document.getElementById('do').value);
+    const airtemp = parseFloat(document.getElementById('airtemp').value);
+    const ph = parseFloat(document.getElementById('ph').value);
+    const light = parseFloat(document.getElementById('light').value);
+    
+    const suggestionDiv = document.getElementById('suggestion');
+    const suggestionContent = document.getElementById('suggestionContent');
+
+    const resultDiv = document.getElementById('results');
+resultDiv.classList.remove('show');
+
+setTimeout(() => {
+    resultDiv.style.display = 'none';
+
+    // Now show suggestion page
+    suggestionDiv.style.display = 'block';
+    setTimeout(() => {
+        suggestionDiv.style.opacity = 1;
+        suggestionDiv.style.transform = 'translateY(0)';
+    }, 50);
+}, 500); // Give time for fade-out transition
+
+    // Wait for the results to fade out before showing suggestions
+    setTimeout(() => {
+        suggestionContent.innerHTML = ''; // Clear any previous content
+
+        // Add suggestions for each parameter
+        if (tds < 300) {
+            suggestionContent.innerHTML += "<div class='warning'>TDS Thấp: Bổ sung khoáng chất: Canxi, Kali, Magie... (Theo dõi tránh TDS tăng nhanh)</div>";
+        } else if (tds > 500) {
+            suggestionContent.innerHTML += "<div class='warning'>TDS Cao: Thay một phần nước bằng nước lọc hoặc nước mưa an toàn để pha loãng; có thể vệ sinh hệ thống</div>";
+        } else {
+            suggestionContent.innerHTML += "<div class='ideal'>TDS Lý tưởng: Không cần điều chỉnh thêm</div>";
+        }
+
+        if (ec < 0.8) {
+            suggestionContent.innerHTML += "<div class='warning'>EC Thấp: Bổ sung khoáng chất: Canxi, Kali, sắt... và vi lượng cho nước</div>";
+        } else if (ec > 1.5) {
+            suggestionContent.innerHTML += "<div class='warning'>EC Cao: Thay một phần nước, tăng cường bộ lọc sinh học, ngưng bổ sung khoáng chất</div>";
+        } else {
+            suggestionContent.innerHTML += "<div class='ideal'>EC Lý tưởng: Không cần điều chỉnh thêm</div>";
+        }
+
+        if (doValue < 4) {
+            suggestionContent.innerHTML += "<div class='warning'>DO Thấp: Tăng cường sục khí, giảm nhiệt nước nếu quá cao, giảm mật độ cá nếu quá dày</div>";
+        } else if (doValue > 10) {
+            suggestionContent.innerHTML += "<div class='warning'>DO Cao: Giảm sục khí, tăng nhiệt nước nếu quá thấp, giảm mật độ cá(cân nhắc)</div>";
+        } else {
+            suggestionContent.innerHTML += "<div class='ideal'>DO Lý tưởng: Không cần điều chỉnh thêm</div>";
+        }
+
+        if (airtemp < 14) {
+            suggestionContent.innerHTML += "<div class='warning'>Nhiệt Khí Thấp: Dùng máy sưởi không khí, quạt thông gió, cách nhiệt bể</div>";
+        } else if (airtemp > 20) {
+            suggestionContent.innerHTML += "<div class='warning'>Nhiệt Khí Cao: Tăng cường thông gió, thoát nhiệt, che nắng, phun sương</div>";
+        } else {
+            suggestionContent.innerHTML += "<div class='ideal'>Nhiệt Khí Lý Tưởng: Không cần điều chỉnh thêm</div>";
+        }
+
+        if (ph < 6) {
+            suggestionContent.innerHTML += "<div class='warning'>PH Thấp: Bổ sung Canxi, Kali,.. Lưu ý tăng từ từ: 0,2 -> 0,3 / 1 ngày</div>";
+        } else if (ph > 7) {
+            suggestionContent.innerHTML += "<div class='warning'>PH Cao: Dùng dung dịch giảm PH, trộn 1 ít nước dầu, thay đổi giá thể</div>";
+        } else {
+            suggestionContent.innerHTML += "<div class='ideal'>PH Lý Tưởng: Không cần điều chỉnh thêm</div>";
+        }
+
+        if (light < 12000) {
+            suggestionContent.innerHTML += "<div class='warning'>Ánh Sáng Thấp: Bổ sung growlight, tăng thông gió, kiểm soát ẩm</div>";
+        } else if (light > 18000) {
+            suggestionContent.innerHTML += "<div class='warning'>Ánh Sáng Cao: Che chắn, lọc sáng, giảm cường độ và đặt đèn xa cây, hạn chế tảo</div>";
+        } else {
+            suggestionContent.innerHTML += "<div class='ideal'>Ánh Sáng Lý Tưởng: Không cần điều chỉnh thêm</div>";
+        }
+
+        if (Humid < 50) {
+            suggestionContent.innerHTML += "<div class='warning'>Độ Ẩm Thấp: Tăng cường hệ thống tưới, sử dụng bể phụ trợ, cải thiện thông gió</div>";
+        } else if (light > 70) {
+            suggestionContent.innerHTML += "<div class='warning'>Độ Ẩm Cao: Tăng cường thông gió, sử dụng máy hút ẩm, điều chỉnh nhiệt độ</div>";
+        } else {
+            suggestionContent.innerHTML += "<div class='ideal'>Độ Ẩm Lý Tưởng: Không cần điều chỉnh thêm</div>";
+        }
+
+        // Show the suggestion page with transition
+        suggestionDiv.style.display = 'block';
+        setTimeout(() => {
+            suggestionDiv.style.opacity = 1;
+            suggestionDiv.style.transform = 'translateY(0)';
+        }, 50);
+    }, 500); // Time to wait before showing suggestions after hiding results
+}
+
+    function goBackToForm() {
+        const suggestionDiv = document.getElementById('suggestion');
+        suggestionDiv.style.opacity = 0;
+        suggestionDiv.style.transform = 'translateY(30px)';
+
+        setTimeout(() => {
+            suggestionDiv.style.display = 'none';
+            document.getElementById('dataForm').reset();
+            document.getElementById('summary').innerHTML = "";
+            const formContainer = document.getElementById('formContainer');
+            formContainer.style.display = "block";
+            formContainer.classList.remove('fade-out');
+        }, 500);
+    }
+</script>
+
+</body>
+</html>
